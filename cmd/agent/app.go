@@ -20,6 +20,7 @@ import (
 	"agentcli/internal/schema"
 	"agentcli/internal/tools"
 	"agentcli/internal/usage"
+	"agentcli/internal/version"
 )
 
 type app struct {
@@ -324,7 +325,7 @@ func (a *app) printBanner() {
 	if a.schema != nil {
 		structured = "on (" + a.cfg.jsonMode + ")"
 	}
-	fmt.Fprintf(a.diag, "%s model=%s base=%s\n", a.render.paint(ansiCyan, "agent "+version), a.cfg.model, a.cfg.baseURL)
+	fmt.Fprintf(a.diag, "%s model=%s base=%s\n", a.render.paint(ansiCyan, "agent "+version.String()), a.cfg.model, a.cfg.baseURL)
 	fmt.Fprintf(a.diag, "  tools=%s · structured=%s · timeout=%s\n", toolsLabel, structured, a.cfg.timeout)
 	fmt.Fprintln(a.diag, a.render.dim("  输入问题开始；/help 查看命令；Ctrl+C 取消当前请求。"))
 }

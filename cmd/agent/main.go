@@ -10,9 +10,9 @@ import (
 	"time"
 
 	_ "time/tzdata" // make IANA timezones work on Windows
-)
 
-const version = "1.0.0"
+	"agentcli/internal/version"
+)
 
 type config struct {
 	model   string
@@ -102,7 +102,7 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			printUsage(stderr)
 			return 0
 		case "version", "-version", "--version":
-			fmt.Fprintf(stdout, "agent %s\n", version)
+			fmt.Fprintf(stdout, "agent %s\n", version.String())
 			return 0
 		case "tools":
 			return listTools(stdout, stderr)
@@ -253,7 +253,7 @@ func printUsage(w io.Writer) {
   /system <text> /verbose /reasoning /exit
 
 参数：
-`, version)
+`, version.String())
 	fs := flag.NewFlagSet("agent", flag.ContinueOnError)
 	fs.SetOutput(w)
 	dummy := defaultConfig()
