@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -190,5 +191,39 @@ func TestUnquotedQuestionBeforeFlags(t *testing.T) {
 	}
 	if !strings.Contains(string(<-bodyCh), "现在 几点 了") {
 		t.Errorf("question was not preserved")
+	}
+}
+
+func TestSplitQuestion(t *testing.T) {
+	cfg := defaultConfig()
+	var key string
+	fs := flag.NewFlagSet("agent", flag.ContinueOnError)
+	registerFlags(fs, &cfg, &key)
+
+	cases := []struct {
+		name  string
+		args  []string
+		wantQ string
+		wantF string
+	}{
+		{"flags first", []string{"--no-tools", "hi"}, "hi", "--no-tools"},
+		{"flags last", []string{"hi", "--no-tools"}, "hi", "--no-tools"},
+		{"value flag", []string{"hi", "--model", "gpt-4o"}, "hi", "--model|gpt-4o"},
+		{"negative value", []string{"-temperature", "-1", "hi"}, "hi", "-temperature|-1"},
+		{"equals form", []string{"--base-url=http://x", "hi"}, "hi", "--base-url=http://x"},
+		{"double dash", []string{"--", "--no-tools"}, "--no-tools", ""},
+		{"multi word", []string{"现在", "几点", "--no-tools"}, "现在 几点", "--no-tools"},
+		{"unknown flag", []string{"hi", "--nope"}, "hi", "--nope"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			q, f := splitQuestion(fs, tc.args)
+			if q != tc.wantQ {
+				t.Errorf("question = %q, want %q", q, tc.wantQ)
+			}
+			if got := strings.Join(f, "|"); got != tc.wantF {
+				t.Errorf("flags = %q, want %q", got, tc.wantF)
+			}
+		})
 	}
 }
