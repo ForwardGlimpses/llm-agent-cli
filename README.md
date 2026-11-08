@@ -23,9 +23,13 @@ agent/
 │   ├── agent/                  # 工具调用循环、结构化输出修复
 │   ├── tools/                  # 工具注册表 + 时间/计算器/读文件
 │   ├── schema/                 # JSON Schema 子集校验 + JSON 提取
-│   └── usage/                  # token 汇总、价格表、费用估算
+│   ├── usage/                  # token 汇总、价格表、费用估算
+│   └── version/                # 版本元数据（构建时 ldflags 注入）
 ├── schema/person.schema.json   # 结构化输出示例
 ├── scripts/demo.ps1            # 一键本地演示
+├── docs/releasing.md           # 分支模型与发版流程
+├── CHANGELOG.md
+├── .github/workflows/ci.yml
 ├── .env.example
 └── go.mod
 ```
@@ -438,6 +442,31 @@ go vet ./...
 - 只支持文本 + function tools，不含图片/音频/Responses API；
 - `deepseek-reasoner` 不支持 function calling，使用它时请加 `-no-tools`（结构化输出会自动退化为 prompt-only 校验）；
 - `mockllm` 只是协议演示，不具备真实模型能力。
+
+## 版本与发布
+
+当前基线是 `v0.1.0`。版本号只有一个来源：
+
+```text
+internal/version/version.go
+```
+
+发布构建注入版本和 commit：
+
+```powershell
+go build -ldflags `
+  "-X agentcli/internal/version.Version=0.1.0 -X agentcli/internal/version.Commit=$(git rev-parse --short HEAD)" `
+  -o bin/agent.exe ./cmd/agent
+```
+
+```text
+$ .\bin\agent.exe version
+agent 0.1.0 (abc1234)
+```
+
+- 分支模型、版本规则、release/hotfix 流程：[docs/releasing.md](docs/releasing.md)
+- 版本变更记录：[CHANGELOG.md](CHANGELOG.md)
+- CI：Go 1.23、gofmt、`go vet`、`go test`、`go build`，见 [.github/workflows/ci.yml](.github/workflows/ci.yml)
 
 ## 依赖
 

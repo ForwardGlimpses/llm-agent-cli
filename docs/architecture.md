@@ -28,10 +28,13 @@ D:\agent
 │   │   └── agent.go              # 消息历史、工具循环、结构化修复
 │   ├── tools/                    # 工具注册表 + 三个内置工具
 │   ├── schema/                   # JSON Schema 子集 + JSON 提取
-│   └── usage/                    # token 汇总 + 价格表 + 费用
+│   ├── usage/                    # token 汇总 + 价格表 + 费用
+│   └── version/                  # 版本元数据（ldflags 注入）
 ├── schema/person.schema.json
 ├── scripts/demo.ps1
 ├── docs/                         # 本文与三张图
+├── .github/workflows/ci.yml
+├── CHANGELOG.md
 ├── go.mod / go.sum
 └── README.md
 ```
@@ -44,7 +47,8 @@ cmd/agent
    │         ├──> internal/tools
    │         ├──> internal/schema
    │         └──> internal/usage ──> internal/llm（只复用 Tokens 类型）
-   └──> internal/usage（渲染费用）
+   ├──> internal/usage（渲染费用）
+   └──> internal/version（版本元数据）
 ```
 
 `llm` 不知道工具和 Schema，`tools` 不知道 HTTP，`schema` 不知道网络。**编排只发生在 `agent`**，这是能单独测试每一层的前提。
